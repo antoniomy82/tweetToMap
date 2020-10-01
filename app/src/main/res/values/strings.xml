@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">twittApp</string>
-    <string name="google_maps_key">YOUR_API_KEY</string>
     <string name="tvTittle">Tittle</string>
     <string name="tvSearch">Enter twit to search</string>
     <string name="btnSearch">Search</string>
     <string name="tvLifeSpan">Lifespan in seconds :</string>
+
+    <string name="google_maps_key">AIzaSyDKF0pORukA3ZIyTK772JsKWAxheSiGCc8</string>
+    <string name="com.twitter.sdk.android.CONSUMER_KEY">RUkM3QSu5jV3CdyUjnitHVFtT</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET">e3DVxZM8XOqFPWA9mYN7rW0NzuaGQSJCWD6sLYxr6e0WMnOy9h</string>
 </resources>
