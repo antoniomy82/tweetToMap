@@ -38,7 +38,9 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
 
     //Retrofit - Gson
+    //noinspection GradleDependency
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    //noinspection GradleDependency
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 
     //Twitter
@@ -48,5 +50,11 @@ dependencies {
     //Okhttp3
     implementation 'se.akerfeldt:okhttp-signpost:1.1.0'
     implementation 'oauth.signpost:signpost-core:1.2.1.2'
+
+    //Picasso
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+    //Circular image
+    implementation 'de.hdodenhof:circleimageview:3.0.0'
 
 }

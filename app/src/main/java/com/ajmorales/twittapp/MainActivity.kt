@@ -39,6 +39,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         var myTweetList: ArrayList<Tweet>? = null
         var myLocations: ArrayList<Geo>? = null
+
+        fun getTweet(position: Int): Tweet {
+            return myTweetList!![position]
+        }
     }
 
 
@@ -141,16 +145,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         googleMap?.setOnMarkerClickListener { marker ->
             val intent = Intent(this, MarkerDetail::class.java)
-            intent.putExtra("tittle", marker.title)
+            intent.putExtra("position", simulatedLocation)
             this.startActivity(intent)
 
             true
         }
 
-        Log.d(
-            "onMapReady (TweetList: ",
-            myTweetList?.size.toString() + ") ( myLocations" + myLocations?.size + ")"
-        )
     }
 
 
@@ -193,7 +193,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                         val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
                         val gson = GsonBuilder().create()
 
-                        var i: Int = 0
+                        var i = 0
                         myTweetList = ArrayList<Tweet>()
 
                         while (i < 10) {
