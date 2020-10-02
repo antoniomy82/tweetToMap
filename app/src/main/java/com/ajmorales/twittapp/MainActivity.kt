@@ -2,16 +2,20 @@ package com.ajmorales.twittapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.ajmorales.twittapp.model.ApiAdapter
-import com.ajmorales.twittapp.model.ApiService
+import com.ajmorales.twittapp.model.Geo
 import com.ajmorales.twittapp.model.Tweet
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
@@ -23,49 +27,52 @@ import retrofit2.Response
 import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+    private val ZOOM_LEVEL = 2f
+    private var handler = Handler()
+    private var runnable: Runnable? = null
+    var lifeSpan: Long = 2000
+    var simulatedLocation: Int = 0
+    var iterator: Int = 0
+    var lastSearch: String? = null
+    private var myMarker: Marker? = null
 
-    private val myTwitterList: ArrayList<TwitModel>? = ArrayList<TwitModel>()
+    companion object {
+        var myTweetList: ArrayList<Tweet>? = null
+        var myLocations: ArrayList<Geo>? = null
+    }
 
-    //var handler = Handler()
-    var runnable: Runnable? = null
-    var lifeSpan: Long = 5000
-
-    private lateinit var service: ApiService
-
-    private val BASE_URL =
-        "http://api.openweathermap.org/" //"http://api.openweathermap.org/data/2.5/weather?q=Ceuta&appid=8d9f4873f77268809bd675a3c061c3a9&units=metric
-    var AppId = "8d9f4873f77268809bd675a3c061c3a9"
-    var lat = "35"
-    var lon = "139"
-    var CITYNAME = "Ceuta"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         supportActionBar?.hide()
-
         setSpinner()
-        loadData()
-        //getTweet()
-        /*
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-        mapFragment?.getMapAsync(this)*/
+
+        loadCoordinates()
+
     }
 
-    /*
+
         override fun onResume() {
             handler.postDelayed(Runnable {
                 handler.postDelayed(runnable!!, lifeSpan)
-                Toast.makeText(
-                    this@MainActivity,
-                    "Update map every " + (lifeSpan / 1000).toString() + " seconds",
-                    Toast.LENGTH_SHORT
-                ).show()
 
-                //Update map fragment
-                val mapFragment =
-                    supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-                mapFragment?.getMapAsync(this)
+                if (simulatedLocation == 9) {
+                    simulatedLocation = 0
+                } else {
+                    simulatedLocation++
+                }
+
+
+                if (myTweetList?.size == 10) {
+                    myMarker?.remove()
+                    //Update Map
+                    val mapFragment =
+                        supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+                    mapFragment?.getMapAsync(this)
+                }
+
+
             }.also { runnable = it }, lifeSpan)
             super.onResume()
         }
@@ -74,14 +81,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             super.onPause()
             handler.removeCallbacks(runnable!!) //stop handler when activity not visible super.onPause();
         }
-    */
+
     private fun setSpinner() {
         //Spinner
         val spLifeSpan: Spinner = findViewById(R.id.sp_lifespan)
         val btnSearch: Button = findViewById(R.id.btnSearch)
         val edSearch: EditText = findViewById(R.id.etSearch)
 
-        val lifeSpanList: List<Int> = listOf(5, 10, 20, 30, 60, 90, 120)
+
+        val lifeSpanList: List<Int> = listOf(2, 5, 10, 20, 30, 60, 90, 120)
         val spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lifeSpanList)
         spLifeSpan.adapter = spAdapter
 
@@ -96,6 +104,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         btnSearch.setOnClickListener {
+            lastSearch = edSearch.text.toString()
             getTweet(edSearch.text.toString())
         }
     }
@@ -105,11 +114,30 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         googleMap?.uiSettings?.isZoomControlsEnabled = true //Zoom in/out
 
-        for (i: Int in 0 until myTwitterList!!.size) {
-            googleMap?.addMarker(myTwitterList[i].latlong?.let {
-                MarkerOptions().position(it).title(myTwitterList[i].tittle)
-            })
+        if (myLocations != null && myTweetList != null) {
+            myMarker = googleMap?.addMarker(
+                MarkerOptions().position(
+                    LatLng(
+                        myLocations?.get(simulatedLocation)?.coordinates!![0],
+                        myLocations?.get(simulatedLocation)?.coordinates!![1]
+                    )
+                ).title(myTweetList!![simulatedLocation].user?.name)
+            )
+            myMarker?.showInfoWindow()
+
+
+            googleMap?.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(
+                        myLocations?.get(
+                            simulatedLocation
+                        )?.coordinates!![0], myLocations?.get(simulatedLocation)?.coordinates!![1]
+                    ), ZOOM_LEVEL
+                )
+            )
+
         }
+
 
         googleMap?.setOnMarkerClickListener { marker ->
             val intent = Intent(this, MarkerDetail::class.java)
@@ -119,22 +147,36 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             true
         }
 
+        Log.d(
+            "onMapReady (TweetList: ",
+            myTweetList?.size.toString() + ") ( myLocations" + myLocations?.size + ")"
+        )
     }
 
 
-    private fun loadData() {
-        myTwitterList?.add(TwitModel(LatLng(-33.862, 151.21), "Sydney"))
-        myTwitterList?.add(TwitModel(LatLng(-31.08332, 150.916672), "Tamworth"))
-        myTwitterList?.add(TwitModel(LatLng(-32.916668, 151.750000), "Newcastle"))
-        myTwitterList?.add(TwitModel(LatLng(40.4631, -3.6501), "Madrid"))
-        myTwitterList?.add(TwitModel(LatLng(40.73, -73.99), "Nueva York"))
+    private fun loadCoordinates() {
+
+        val newLocation: ArrayList<Geo> = ArrayList<Geo>()
+
+        newLocation.add(Geo("Málaga", listOf(36.72016, -4.42034)))
+        newLocation.add(Geo("Londres", listOf(51.51279, -0.09184)))
+        newLocation.add(Geo("Tetuan", listOf(35.5784500, -5.3683700)))
+        newLocation.add(Geo("Madrid", listOf(40.4631, -3.6501)))
+        newLocation.add(Geo("Granada ", listOf(37.18817, -3.60667)))
+        newLocation.add(Geo("Nueva York", listOf(40.73, -73.99)))
+        newLocation.add(Geo("Mexico", listOf(19.4978, -99.1269)))
+        newLocation.add(Geo("Buenos Aires", listOf(-34.61315, -58.37723)))
+        newLocation.add(Geo("Toronto", listOf(43.70011, -79.4163)))
+        newLocation.add(Geo("Sydney", listOf(-33.862, 151.21)))
+
+
+        myLocations = newLocation
     }
 
     //Meter esto en ViewModel
-    fun getTweet(str: String) {
+    private fun getTweet(str: String) {
         val currentCall: Call<ResponseBody>? = ApiAdapter().api!!.getTweet(str)
         currentCall?.enqueue(streamResponse)
-
     }
 
     private val streamResponse: Callback<ResponseBody> = object : Callback<ResponseBody> {
@@ -145,57 +187,66 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             if (response.isSuccessful) {
                 Log.e("SUCCESS!", "Call OK")
 
-                try {
-                    val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
-                    val gson = GsonBuilder().create()
 
-                    var i = 0
+                Thread(Runnable {
+                    try {
+                        val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
+                        val gson = GsonBuilder().create()
 
-                    while (true) {
-                        val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
+                        var i: Int = 0
+                        myTweetList = ArrayList<Tweet>()
 
-                        //Log.d("debug", "JSON: $j")
+                        while (i < 10) {
+                            val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
 
-                        Log.d("debug", "SEARCHING.." + i++)
+                            if (j.getAsJsonObject("user") != null) {
+                                val tweet = gson.fromJson(j, Tweet::class.java)
 
-                        if (j.getAsJsonObject("user") != null) {
-                            val tweet = gson.fromJson(j, Tweet::class.java)
-                            // val coordinates: com.ajmorales.twittapp.model.Geo= gson.fromJson(j, com.ajmorales.twittapp.model.Geo::class.java)
 
-                            if (tweet.coordinates != null || tweet.geo != null) {
-                                Log.d("debug", "JSON: $j")
+                                myTweetList?.add(tweet)
 
                                 Log.d(
-                                    "@User",
-                                    tweet.user?.username.toString() + " GEO: [" + tweet.geo?.coordinates?.get(
-                                        0
-                                    ) + "," + tweet.geo?.coordinates?.get(1) + "] Coordinates [" +
-                                            tweet.coordinates?.coordinates?.get(0) + "," + tweet.coordinates?.coordinates?.get(
-                                        1
-                                    ) + "]"
+                                    "Searching location(",
+                                    i.toString() + ") [Autor]:" + tweet.user?.name.toString()
                                 )
-                            }
-                            /*
-                              tweet.geo?.coordinates?.get(0)
-                                  Log.d("@ User", tweet.user?.username.toString()+" GEO: "+ tweet.geo_enabled.toString())*/
 
-                            //myTwitterList.add()
-                            //tweetsList.add(tweet)
-                            // Updating UI
-                            //  updateUI(tweetsList)
+                                if (tweet.coordinates != null || tweet.geo != null) {
+                                    //  Log.d("debug", "JSON: $j")
+
+                                    Log.d(
+                                        "\n Location found!",
+                                        tweet.user?.name.toString() + " GEO: [" + tweet.geo?.coordinates?.get(
+                                            0
+                                        ) + "," + tweet.geo?.coordinates?.get(1) + "] Coordinates [" +
+                                                tweet.coordinates?.coordinates?.get(0) + "," + tweet.coordinates?.coordinates?.get(
+                                            1
+                                        ) + "]\n[Text:]" + tweet.text
+                                    )
+                                }
+
+                                i++
+                                // Updating UI
+                                //  updateUI(tweetsList)
+                            }
                         }
+
+                    } catch (e: Exception) {
+                        Log.e("error", "ERROR : ${e.message}")
                     }
-                } catch (e: Exception) {
-                    Log.e("error", "ERROR : ${e.message}")
-                }
+                }).start()
+
+            } else {
+                Log.e("ERROR:", "[Warning]" + response.toString())
             }
+
+            Thread.interrupted()
         }
+
 
         override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
             Log.e("error", "onFailure call")
         }
     }
-
 }
 
 

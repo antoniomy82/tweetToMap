@@ -4,5 +4,5 @@ class Coordinates {
     var type: String? = null
 
     // 0: LONGITUDE, 1:latitude
-    var coordinates: List<Float>? = null
+    var coordinates: List<Double>? = null
 }
