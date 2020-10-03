@@ -22,6 +22,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    buildFeatures{
+        dataBinding = true
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -34,12 +39,14 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
-    //Google Maps
+    //Maps
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
 
-    //Retrofit - Gson
+    //Retrofit
     //noinspection GradleDependency
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+
+    //Gson
     //noinspection GradleDependency
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 
@@ -47,7 +54,7 @@ dependencies {
     implementation 'com.twitter.sdk.android:twitter:3.1.1'
     implementation'com.twitter.sdk.android:twitter-core:3.1.1'
 
-    //Okhttp3
+    //Okhttp3 -- Ver
     implementation 'se.akerfeldt:okhttp-signpost:1.1.0'
     implementation 'oauth.signpost:signpost-core:1.2.1.2'
 

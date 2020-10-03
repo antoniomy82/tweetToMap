@@ -1,4 +1,4 @@
-package com.ajmorales.twittapp
+package com.ajmorales.twittapp.view
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,9 +7,10 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.ajmorales.twittapp.model.ApiAdapter
+import com.ajmorales.twittapp.R
 import com.ajmorales.twittapp.model.Geo
 import com.ajmorales.twittapp.model.Tweet
+import com.ajmorales.twittapp.model.TweetObservable
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -17,14 +18,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
-import com.google.gson.stream.JsonReader
-import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val ZOOM_LEVEL = 2f
@@ -36,13 +29,28 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     var lastSearch: String? = null
     private var myMarker: Marker? = null
 
-    companion object {
-        var myTweetList: ArrayList<Tweet>? = null
-        var myLocations: ArrayList<Geo>? = null
+    private val tweetsObservable: TweetObservable = TweetObservable()  //@@@@@ Pasarlo a ViewModel
+    var myList: List<Tweet>? = null //@@@@@@@@@@@@@@@@@@@@
 
-        fun getTweet(position: Int): Tweet {
-            return myTweetList!![position]
+    //Pasarlo a ViewModel
+    fun getTweetAt(position: Int): Tweet? {
+        return myList?.get(position)
+    }
+
+    companion object {
+        var myLocations: ArrayList<Geo>? = null
+        var myListT: List<Tweet>? = null
+
+        //Pasarlo a ViewModel
+        fun getTweetAt(position: Int): Tweet? {
+            return myListT?.get(position)
         }
+
+        @JvmName("setMyListT1")
+        fun setMyListT(lista: List<Tweet>) {
+            this.myListT = lista
+        }
+
     }
 
 
@@ -68,7 +76,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
 
 
-                if (myTweetList?.size == 10) {
+                myList = tweetsObservable.getTweet().value
+                myList?.let { setMyListT(it) }
+
+                Log.d("@@MyList", myList?.size.toString())
+
+                if (myList?.size == 10) {
                     myMarker?.remove()
                     //Update Map
                     val mapFragment =
@@ -109,26 +122,31 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         btnSearch.setOnClickListener {
             lastSearch = edSearch.text.toString()
-            getTweet(edSearch.text.toString())
+            //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+            tweetsObservable.callTweets(edSearch.text.toString())
+            // getTweet(edSearch.text.toString()) //TweetRepositoryImpl Antiguo
+
         }
     }
 
-
+    //A ViewModel
     override fun onMapReady(googleMap: GoogleMap?) {
 
         googleMap?.uiSettings?.isZoomControlsEnabled = true //Zoom in/out
 
-        if (myLocations != null && myTweetList != null) {
+        if (myLocations != null && myList != null) {
             myMarker = googleMap?.addMarker(
                 MarkerOptions().position(
                     LatLng(
                         myLocations?.get(simulatedLocation)?.coordinates!![0],
                         myLocations?.get(simulatedLocation)?.coordinates!![1]
                     )
-                ).title(myTweetList!![simulatedLocation].user?.name)
-            )
+                ).title(myList!![simulatedLocation].user?.name)
+            ) //myTweetList!![simulatedLocation].user?.name @@@@@@@@@@@@@@@@@@@@
             myMarker?.showInfoWindow()
 
+            Log.d("Dato List:", myList!![simulatedLocation].user?.name.toString())
 
             googleMap?.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
@@ -171,81 +189,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
         myLocations = newLocation
-    }
-
-    //Meter esto en ViewModel
-    private fun getTweet(str: String) {
-        val currentCall: Call<ResponseBody>? = ApiAdapter().api!!.getTweet(str)
-        currentCall?.enqueue(streamResponse)
-    }
-
-    private val streamResponse: Callback<ResponseBody> = object : Callback<ResponseBody> {
-        override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-
-            Log.d("debug", "Getting data - ON RESPONSE")
-
-            if (response.isSuccessful) {
-                Log.e("SUCCESS!", "Call OK")
-
-
-                Thread(Runnable {
-                    try {
-                        val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
-                        val gson = GsonBuilder().create()
-
-                        var i = 0
-                        myTweetList = ArrayList<Tweet>()
-
-                        while (i < 10) {
-                            val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
-
-                            if (j.getAsJsonObject("user") != null) {
-                                val tweet = gson.fromJson(j, Tweet::class.java)
-
-
-                                myTweetList?.add(tweet)
-
-                                Log.d(
-                                    "Searching location(",
-                                    i.toString() + ") [Autor]:" + tweet.user?.name.toString()
-                                )
-
-                                if (tweet.coordinates != null || tweet.geo != null) {
-                                    //  Log.d("debug", "JSON: $j")
-
-                                    Log.d(
-                                        "\n Location found!",
-                                        tweet.user?.name.toString() + " GEO: [" + tweet.geo?.coordinates?.get(
-                                            0
-                                        ) + "," + tweet.geo?.coordinates?.get(1) + "] Coordinates [" +
-                                                tweet.coordinates?.coordinates?.get(0) + "," + tweet.coordinates?.coordinates?.get(
-                                            1
-                                        ) + "]\n[Text:]" + tweet.text
-                                    )
-                                }
-
-                                i++
-                                // Updating UI
-                                //  updateUI(tweetsList)
-                            }
-                        }
-
-                    } catch (e: Exception) {
-                        Log.e("error", "ERROR : ${e.message}")
-                    }
-                }).start()
-
-            } else {
-                Log.e("ERROR:", "[Warning]" + response.toString())
-            }
-
-            Thread.interrupted()
-        }
-
-
-        override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-            Log.e("error", "onFailure call")
-        }
     }
 }
 
