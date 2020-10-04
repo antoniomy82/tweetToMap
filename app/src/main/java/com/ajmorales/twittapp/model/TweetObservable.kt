@@ -8,11 +8,15 @@ class TweetObservable {
 
     //Repository
     fun callTweets(str: String) {
-        tweetRepository.getTweetsAPI(str)
+        tweetRepository.callTweetsAPI(str)
     }
 
     //ViewModel
-    fun getTweet(): MutableLiveData<List<Tweet>> {
-        return tweetRepository.getTweet()
+    fun getTweets(): MutableLiveData<List<Tweet>> {
+        return tweetRepository.getTweets()
+    }
+
+    fun getResponse(): String {
+        return tweetRepository.getResponse()
     }
 }

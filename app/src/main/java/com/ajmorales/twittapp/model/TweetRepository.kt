@@ -4,6 +4,8 @@ import androidx.lifecycle.MutableLiveData
 
 interface TweetRepository {
 
-    fun getTweet(): MutableLiveData<List<Tweet>>
-    fun getTweetsAPI(str: String)
+    fun getTweets(): MutableLiveData<List<Tweet>>
+    fun callTweetsAPI(str: String)
+    fun getResponse(): String
+
 }
