@@ -14,16 +14,12 @@ class Tweet() : Parcelable {
         createdAt = parcel.readString()
         text = parcel.readString()
         user = parcel.readParcelable(User::class.java.classLoader)
-        geo = parcel.readParcelable(Geo::class.java.classLoader)
-        coordinates = parcel.readParcelable(Coordinates::class.java.classLoader)
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(createdAt)
         parcel.writeString(text)
         parcel.writeParcelable(user, flags)
-        parcel.writeParcelable(geo, flags)
-        parcel.writeParcelable(coordinates, flags)
     }
 
     override fun describeContents(): Int {
@@ -39,6 +35,7 @@ class Tweet() : Parcelable {
             return arrayOfNulls(size)
         }
     }
+
 }
 
 

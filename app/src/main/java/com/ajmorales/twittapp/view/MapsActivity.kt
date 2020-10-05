@@ -1,5 +1,6 @@
 package com.ajmorales.twittapp.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -29,7 +30,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var runnable: Runnable? = null
     private var myMarker: Marker? = null
 
-    var lifeSpan: Long = 3000
+    var lifeSpan: Long = 5000
     var iterator: Int = 0
     var iterator2: Int = 0
     private var searchWord: String? = null
@@ -41,10 +42,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var tvLifespan: TextView? = null
     private var btnSearch: Button? = null
     private var edSearch: EditText? = null
+
     var isConnected = false
 
     var spLifeSpan: Spinner? = null
 
+    @SuppressLint("ResourceType")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
@@ -60,7 +63,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         progressBar?.visibility = View.GONE
 
         spLifeSpan = findViewById(R.id.sp_lifespan)
-        val lifeSpanList: List<Int> = listOf(3, 5, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60)
+
+        val lifeSpanList: List<Int> = listOf(5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 3)
         val spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lifeSpanList)
         spLifeSpan?.adapter = spAdapter
 
@@ -74,18 +78,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
+
         btnSearch?.setOnClickListener {
 
             if (!isConnected) {
                 textInVisible()
-                tvSearching?.text = "CHECK YOUR CONNECTION"
+                tvSearching?.text = getString(R.string.tvCheckConnection)
                 Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_SHORT).show()
             } else {
                 textInVisible()
-                tvSearching?.text = "LOADING DATA.."
+                tvSearching?.text = getString(R.string.tvSearchingConnection)
                 tvSearching?.visibility = View.VISIBLE
                 progressBar?.visibility = View.VISIBLE
-
+                iterator = 0
+                iterator2 = 0
                 searchWord = edSearch?.text.toString()
                 tweetViewModel.callTweets(edSearch?.text.toString()) //ViewModel
             }
@@ -122,10 +128,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     iterator2++
                 }
                 tweetViewModel.setListTweets()
+                if (tweetViewModel.getResponse().contains("Updating: ")) {
+                    Toast.makeText(this, (tweetViewModel.getResponse()), Toast.LENGTH_SHORT).show()
+                }
+
+                val timeRemaining =
+                    ((lifeSpan / 1000).toInt() * 40) - ((lifeSpan / 1000).toInt() * iterator2)
                 if (tweetViewModel.getResponse().contains("code=420")) {
                     Toast.makeText(
                         this,
-                        "420 Enhance Your Calm:\n \n Returned by the Twitter Search and Trends API when the client is being rate limited.\n \n Get a professional API or try increasing the lifespan \n \n Showing previous tweets!! \n\n ¡Merezco el curro por los dolores de cabeza! -> API HORRIBLE :-)",
+                        "420 Enhance Your Calm:\n Returned by the Twitter Search and Trends API when the client is being rate limited.\n Get a professional API or try increasing the lifespan \n Showing previous tweets!! \n ¡Merezco el curro por los dolores de cabeza! -> API HORRIBLE :-) \n\n Relauching call in: " + timeRemaining.toString() + " sec",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -145,7 +157,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 isConnected = isOnline(this)
                 textInVisible()
                 tvSearching?.visibility = View.VISIBLE
-                tvSearching?.text = "CHECK YOUR CONNECTION"
+                tvSearching?.text = getString(R.string.tvCheckConnection)
                 Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_SHORT).show()
                 myMarker?.remove()
             }
@@ -172,16 +184,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             ) != null
         ) {
             myLatLon = LatLng(
-                tweetViewModel.getListTweets()!![iterator].geo?.coordinates!!.get(0),
-                tweetViewModel.getListTweets()!![iterator].geo?.coordinates!!.get(1)
+                tweetViewModel.getListTweets()!![iterator].geo?.coordinates!![0],
+                tweetViewModel.getListTweets()!![iterator].geo?.coordinates!![1]
             )
         } else if (tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates?.get(0) != null && tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates?.get(
                 1
             ) != null
         ) {
             myLatLon = LatLng(
-                tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates!!.get(1),
-                tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates!!.get(0)
+                tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates!![1],
+                tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates!![0]
             )
         } else { //Simulated location
             myLatLon = LatLng(
@@ -198,7 +210,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             myMarker?.showInfoWindow()
 
             Log.d(
-                "Dato List:",
+                "Showing tweet:",
                 tweetViewModel.getListTweets()!![iterator].user?.name.toString() + " [" + iterator2 + "]"
             )
 
@@ -224,23 +236,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     fun isOnline(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (connectivityManager != null) {
-            val capabilities =
-                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            if (capabilities != null) {
-                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-                    return true
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
-                    return true
 
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        if (capabilities != null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                return true
+
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
                     Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
                     return true
                 }
             }
-        }
+
         return false
     }
 
