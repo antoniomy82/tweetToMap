@@ -1,7 +1,7 @@
-package com.ajmorales.twittapp.model
+package com.ajmorales.tweetToMap.model
 
-// 0:latitude, 1:LONGITUDE
-class Geo(type: String, coordinates: List<Double>) {
+// 0: LONGITUDE, 1:latitude
+class Coordinates(type: String, coordinates: List<Double>) {
     var type: String? = null
     var coordinates: List<Double>? = null
 
@@ -10,4 +10,3 @@ class Geo(type: String, coordinates: List<Double>) {
         this.coordinates = coordinates
     }
 }
-

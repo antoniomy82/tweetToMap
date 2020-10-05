@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">twittApp</string>
+    <string name="app_name">twettToMap</string>
     <string name="tvTittle">Tittle</string>
     <string name="tvSearch">Enter word to search</string>
     <string name="btnSearch">Search</string>

@@ -1,4 +1,4 @@
-package com.ajmorales.twittapp.model
+package com.ajmorales.tweetToMap.model
 
 import android.os.Parcel
 import android.os.Parcelable

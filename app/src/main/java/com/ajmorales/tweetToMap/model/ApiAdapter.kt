@@ -1,4 +1,4 @@
-package com.ajmorales.twittapp.model
+package com.ajmorales.tweetToMap.model
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

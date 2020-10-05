@@ -1,12 +1,12 @@
-package com.ajmorales.twittapp.view
+package com.ajmorales.tweetToMap.view
 
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.ajmorales.twittapp.R
-import com.ajmorales.twittapp.model.Tweet
-import com.ajmorales.twittapp.model.User
+import com.ajmorales.tweetToMap.R
+import com.ajmorales.tweetToMap.model.Tweet
+import com.ajmorales.tweetToMap.model.User
 import com.squareup.picasso.Picasso
 
 class MarkerDetail : AppCompatActivity() {

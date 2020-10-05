@@ -1,9 +1,7 @@
-package com.ajmorales.twittapp.view
+package com.ajmorales.tweetToMap.view
 
 import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -13,10 +11,11 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
-import com.ajmorales.twittapp.R
-import com.ajmorales.twittapp.model.Geo
-import com.ajmorales.twittapp.model.Tweet
-import com.ajmorales.twittapp.viewmodel.TweetViewModel
+import com.ajmorales.tweetToMap.R
+import com.ajmorales.tweetToMap.model.Geo
+import com.ajmorales.tweetToMap.model.Tweet
+import com.ajmorales.tweetToMap.utils.Utils
+import com.ajmorales.tweetToMap.viewmodel.TweetViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -37,10 +36,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var myLocations: ArrayList<Geo>? = ArrayList<Geo>()
     var model: TweetViewModel? = null
+    var util: Utils? = Utils()
 
-    var myTweets: MutableLiveData<List<Tweet>>? = null
-    var myListTweets: List<Tweet>? = null
-
+    private var myTweets: MutableLiveData<List<Tweet>>? = null
+    private var myListTweets: List<Tweet>? = null
     private var searchWord: String? = null
 
     private var progressBar: ProgressBar? = null
@@ -56,7 +55,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_maps)
         supportActionBar?.hide()
 
-        progressBar = findViewById<ProgressBar>(R.id.progressBar) as ProgressBar
+        progressBar = findViewById<ProgressBar>(R.id.progressBar)
         tvSearching = findViewById(R.id.tvSearching)
         tvLifespan = findViewById(R.id.tvLifespan)
         btnSearch = findViewById(R.id.btnSearch)
@@ -65,13 +64,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         tvSearching?.visibility = View.GONE
         progressBar?.visibility = View.GONE
 
-        //To preserve data in case to switch portrait to landscape LifeCycle
+        //To preserve data in case to switch portrait to landscape - LifeCycle
         model = ViewModelProvider(this).get(TweetViewModel::class.java)
 
         if (model!!.callIterator()?.value != null) {
             iterator = model!!.callIterator()?.value!!
         }
-
 
         //Lifespan spinner
         spLifeSpan = findViewById(R.id.sp_lifespan)
@@ -91,7 +89,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //Search button
         btnSearch?.setOnClickListener {
 
-            if (!isOnline(this)) {
+            if (!util!!.isOnline(this)) {
                 textInVisible()
                 tvSearching?.text = getString(R.string.tvCheckConnection)
                 Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_SHORT).show()
@@ -107,9 +105,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         }
 
-        myLocations = model?.getSimulatedLocations()
-
-        // setupBinding(savedInstanceState) //Activamos DataBinding
+        myLocations = util?.getSimulatedLocations()
     }
 
     override fun onResume() {
@@ -118,19 +114,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         handler.postDelayed(Runnable {
             handler.postDelayed(runnable!!, lifeSpan)
 
-            //When parsing process is done!
-            if (model?.getResponse()!!.contains("OK")) {
-                myTweets = model?.getTweets()
-                myListTweets = myTweets?.value
-            }
-
-            if (isOnline(this)) {
-                textVisible()
+            if (util!!.isOnline(this)) {
+                //When parsing process is done!
+                if (model?.getResponse()!!.contains("DONE")) {
+                    myTweets = model?.getTweets()
+                    myListTweets = myTweets?.value
+                }
 
                 if (iterator == 29) {
-                    searchWord?.let { model?.callTweets(it) }
                     iterator = 0
                     model!!.setIterator(iterator)
+                    model!!.callTweets(edSearch?.text.toString()) //Relaunch automaticaly
                 } else {
                     iterator++
                     model!!.setIterator(iterator)
@@ -140,6 +134,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val timeRemaining =
                     ((lifeSpan / 1000).toInt() * 30) - ((lifeSpan / 1000).toInt() * iterator)
                 if (model?.getResponse()!!.contains("code=420")) {
+
                     Toast.makeText(
                         this,
                         "420 Enhance Your Calm:\n Returned by the Twitter Search and Trends API when the client is being rate limited.\n Get a professional API or try increasing the lifespan \n Showing previous tweets!! \n ¡Merezco el curro por los dolores de cabeza! -> API HORRIBLE :-) \n\n Relauching call in: " + timeRemaining.toString() + " sec",
@@ -147,10 +142,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     ).show()
                 }
 
-                Log.d("ListTweetsSize: ", myListTweets?.size.toString())
-
                 if (myListTweets?.size == 30) {
-
                     textVisible()
                     myMarker?.remove()
                     //Update Map
@@ -159,7 +151,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     mapFragment?.getMapAsync(this)
                 }
 
-            } else {
+            } else {//No internet
                 textInVisible()
                 tvSearching?.visibility = View.VISIBLE
                 tvSearching?.text = getString(R.string.tvCheckConnection)
@@ -182,7 +174,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         googleMap?.uiSettings?.isZoomControlsEnabled = true //Zoom in/out
         val myLatLon: LatLng
-
 
         //If there are geo or coordinates
         if (myListTweets?.get(iterator)?.geo?.coordinates?.get(0) != null && myListTweets?.get(
@@ -243,30 +234,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         imm.hideSoftInputFromWindow(windowToken, 0)
     }
 
-    private fun isOnline(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        if (capabilities != null) {
-            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-                return true
-            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
-                return true
-
-            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
-                    return true
-                }
-            }
-
-        return false
-    }
-
-    fun textVisible() {
+    private fun textVisible() {
         spLifeSpan?.visibility = View.VISIBLE
         tvLifespan?.visibility = View.VISIBLE
         btnSearch?.visibility = View.VISIBLE
@@ -275,28 +244,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         progressBar?.visibility = View.GONE
     }
 
-    fun textInVisible() {
+    private fun textInVisible() {
         edSearch?.hideKeyboard()
         spLifeSpan?.visibility = View.GONE
         tvLifespan?.visibility = View.GONE
         btnSearch?.visibility = View.GONE
         edSearch?.visibility = View.GONE
     }
-/*
-    //Activa el sistema de bindeo
-    fun setupBinding(savedInstanceState: Bundle?){
-        var activityMainBinding: ActivityMainBinding = DataBindingUtil.setContentView(this,R.layout.activity_maps)
-
-        tweetViewModel = ViewModelProvider(this).get(TweetViewModel::class.java)
-
-        activityMainBinding.setMyViewModel(tweetViewModel)  //set Nombre que hayamos puesto en el XML
-        setupLoqueSea()
-    }
-
-    fun setupLoqueSea(){
-        //Aquí lanzamos el Thread principal, que dejaremos en TweetViewModel
-
-    }*/
 }
 
 

@@ -7,13 +7,14 @@
 
         <variable
             name="myViewModel"
-            type="com.ajmorales.twittapp.viewmodel.TweetViewModel" />
+            type="com.ajmorales.tweetToMap.viewmodel.TweetViewModel" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#ADDBFF"
         tools:context=".view.MapsActivity">
 
 
@@ -24,14 +25,14 @@
             android:layout_marginStart="5dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="30dp"
+            android:autofillHints=""
             android:ems="10"
             android:hint="@string/tvSearch"
             android:inputType="text"
             app:layout_constraintEnd_toStartOf="@+id/btnSearch"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:autofillHints="" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Spinner
             android:id="@+id/sp_lifespan"

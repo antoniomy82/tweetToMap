@@ -1,4 +1,4 @@
-package com.ajmorales.twittapp.model
+package com.ajmorales.tweetToMap.model
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -87,7 +87,7 @@ class TweetRepositoryImpl : TweetRepository {
                     }
 
                     tweets.value = tweetsList
-                    responseStr = "OK"
+                    responseStr = "DONE"
 
                 } catch (e: Exception) {
                     Log.e("error", "ERROR : ${e.message}")

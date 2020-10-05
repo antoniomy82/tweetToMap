@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ajmorales.twittapp">
+    package="com.ajmorales.tweetToMap">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".view.MarkerDetail" />
+        <activity android:name="com.ajmorales.tweetToMap.view.MarkerDetail" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -23,7 +23,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".view.MapsActivity">
+        <activity android:name="com.ajmorales.tweetToMap.view.MapsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
