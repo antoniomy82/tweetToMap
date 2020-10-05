@@ -56,7 +56,7 @@ class TweetRepositoryImpl : TweetRepository {
 
                     var i = 0
 
-                    while (i < 40) {
+                    while (i < 30) {
                         val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
 
                         if (j.getAsJsonObject("user") != null) {

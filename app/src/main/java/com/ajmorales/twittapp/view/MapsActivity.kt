@@ -1,6 +1,5 @@
 package com.ajmorales.twittapp.view
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -12,8 +11,11 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
 import com.ajmorales.twittapp.R
 import com.ajmorales.twittapp.model.Geo
+import com.ajmorales.twittapp.model.Tweet
 import com.ajmorales.twittapp.viewmodel.TweetViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -32,22 +34,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     var lifeSpan: Long = 5000
     var iterator: Int = 0
-    var iterator2: Int = 0
+
+    private var myLocations: ArrayList<Geo>? = ArrayList<Geo>()
+    var model: TweetViewModel? = null
+
+    var myTweets: MutableLiveData<List<Tweet>>? = null
+    var myListTweets: List<Tweet>? = null
+
     private var searchWord: String? = null
 
-    private var tweetViewModel: TweetViewModel = TweetViewModel()
-    private var myLocations: ArrayList<Geo>? = ArrayList<Geo>()
     private var progressBar: ProgressBar? = null
     private var tvSearching: TextView? = null
     private var tvLifespan: TextView? = null
     private var btnSearch: Button? = null
     private var edSearch: EditText? = null
+    private var spLifeSpan: Spinner? = null
 
-    var isConnected = false
 
-    var spLifeSpan: Spinner? = null
-
-    @SuppressLint("ResourceType")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
@@ -62,26 +65,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         tvSearching?.visibility = View.GONE
         progressBar?.visibility = View.GONE
 
-        spLifeSpan = findViewById(R.id.sp_lifespan)
+        //To preserve data in case to switch portrait to landscape LifeCycle
+        model = ViewModelProvider(this).get(TweetViewModel::class.java)
 
-        val lifeSpanList: List<Int> = listOf(5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 3)
+        if (model!!.callIterator()?.value != null) {
+            iterator = model!!.callIterator()?.value!!
+        }
+
+
+        //Lifespan spinner
+        spLifeSpan = findViewById(R.id.sp_lifespan)
+        val lifeSpanList: List<Int> = listOf(3, 5, 7, 9, 10, 12, 15)
         val spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lifeSpanList)
         spLifeSpan?.adapter = spAdapter
 
         spLifeSpan?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
                 lifeSpan = (lifeSpanList[position] * 1000.toLong())
-                println(lifeSpan)
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) { //Nothing to do
             }
         }
 
-
+        //Search button
         btnSearch?.setOnClickListener {
 
-            if (!isConnected) {
+            if (!isOnline(this)) {
                 textInVisible()
                 tvSearching?.text = getString(R.string.tvCheckConnection)
                 Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_SHORT).show()
@@ -91,14 +101,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 tvSearching?.visibility = View.VISIBLE
                 progressBar?.visibility = View.VISIBLE
                 iterator = 0
-                iterator2 = 0
                 searchWord = edSearch?.text.toString()
-                tweetViewModel.callTweets(edSearch?.text.toString()) //ViewModel
+                model!!.callTweets(edSearch?.text.toString()) //ViewModel @@@
             }
 
         }
 
-        myLocations = tweetViewModel.getSimulatedLocations()
+        myLocations = model?.getSimulatedLocations()
 
         // setupBinding(savedInstanceState) //Activamos DataBinding
     }
@@ -109,32 +118,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         handler.postDelayed(Runnable {
             handler.postDelayed(runnable!!, lifeSpan)
 
+            //When parsing process is done!
+            if (model?.getResponse()!!.contains("OK")) {
+                myTweets = model?.getTweets()
+                myListTweets = myTweets?.value
+            }
+
             if (isOnline(this)) {
-                isConnected = isOnline(this)
                 textVisible()
 
-
-                if (iterator == 9) {
+                if (iterator == 29) {
+                    searchWord?.let { model?.callTweets(it) }
                     iterator = 0
+                    model!!.setIterator(iterator)
                 } else {
                     iterator++
+                    model!!.setIterator(iterator)
                 }
 
-
-                if (iterator2 == 39) {
-                    searchWord?.let { tweetViewModel.callTweets(it) }
-                    iterator2 = 0
-                } else {
-                    iterator2++
-                }
-                tweetViewModel.setListTweets()
-                if (tweetViewModel.getResponse().contains("Updating: ")) {
-                    Toast.makeText(this, (tweetViewModel.getResponse()), Toast.LENGTH_SHORT).show()
-                }
-
+                //Warning response 420
                 val timeRemaining =
-                    ((lifeSpan / 1000).toInt() * 40) - ((lifeSpan / 1000).toInt() * iterator2)
-                if (tweetViewModel.getResponse().contains("code=420")) {
+                    ((lifeSpan / 1000).toInt() * 30) - ((lifeSpan / 1000).toInt() * iterator)
+                if (model?.getResponse()!!.contains("code=420")) {
                     Toast.makeText(
                         this,
                         "420 Enhance Your Calm:\n Returned by the Twitter Search and Trends API when the client is being rate limited.\n Get a professional API or try increasing the lifespan \n Showing previous tweets!! \n ¡Merezco el curro por los dolores de cabeza! -> API HORRIBLE :-) \n\n Relauching call in: " + timeRemaining.toString() + " sec",
@@ -142,19 +147,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     ).show()
                 }
 
-                if (tweetViewModel.getListTweets()?.size == 40 && isOnline(this)) {
+                Log.d("ListTweetsSize: ", myListTweets?.size.toString())
+
+                if (myListTweets?.size == 30) {
+
                     textVisible()
                     myMarker?.remove()
                     //Update Map
                     val mapFragment =
                         supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
                     mapFragment?.getMapAsync(this)
-                } else {
-                    tweetViewModel.setListTweets()
                 }
 
             } else {
-                isConnected = isOnline(this)
                 textInVisible()
                 tvSearching?.visibility = View.VISIBLE
                 tvSearching?.text = getString(R.string.tvCheckConnection)
@@ -178,22 +183,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         googleMap?.uiSettings?.isZoomControlsEnabled = true //Zoom in/out
         val myLatLon: LatLng
 
+
         //If there are geo or coordinates
-        if (tweetViewModel.getListTweets()!![iterator].geo?.coordinates?.get(0) != null && tweetViewModel.getListTweets()!![iterator].geo?.coordinates?.get(
+        if (myListTweets?.get(iterator)?.geo?.coordinates?.get(0) != null && myListTweets?.get(
+                iterator
+            )?.geo?.coordinates?.get(
                 1
             ) != null
         ) {
             myLatLon = LatLng(
-                tweetViewModel.getListTweets()!![iterator].geo?.coordinates!![0],
-                tweetViewModel.getListTweets()!![iterator].geo?.coordinates!![1]
+                myListTweets?.get(iterator)?.geo?.coordinates!![0],
+                myListTweets?.get(iterator)?.geo?.coordinates!![1]
             )
-        } else if (tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates?.get(0) != null && tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates?.get(
+        } else if (myListTweets?.get(iterator)?.coordinates?.coordinates?.get(0) != null && myListTweets?.get(
+                iterator
+            )?.coordinates?.coordinates?.get(
                 1
             ) != null
         ) {
             myLatLon = LatLng(
-                tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates!![1],
-                tweetViewModel.getListTweets()!![iterator].coordinates?.coordinates!![0]
+                myListTweets?.get(iterator)?.coordinates?.coordinates!![1],
+                myListTweets?.get(iterator)?.coordinates?.coordinates!![0]
             )
         } else { //Simulated location
             myLatLon = LatLng(
@@ -202,16 +212,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         }
 
-        if (myLocations != null && tweetViewModel.getListTweets() != null) {
+        if (myLocations != null && myListTweets?.get(iterator) != null) {
             myMarker = googleMap?.addMarker(
                 MarkerOptions().position(myLatLon)
-                    .title(tweetViewModel.getListTweets()!![iterator].user?.name)
+                    .title(myListTweets?.get(iterator)?.user?.name)
             )
             myMarker?.showInfoWindow()
 
             Log.d(
                 "Showing tweet:",
-                tweetViewModel.getListTweets()!![iterator].user?.name.toString() + " [" + iterator2 + "]"
+                myListTweets?.get(iterator)?.user?.name.toString() + " [" + iterator + "]"
             )
 
             googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(myLatLon, zoom))
@@ -220,8 +230,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         googleMap?.setOnMarkerClickListener {
             val intent = Intent(this, MarkerDetail::class.java)
-            intent.putExtra("tweet", tweetViewModel.getListTweets()!![iterator])
-            intent.putExtra("user", tweetViewModel.getListTweets()!![iterator].user)
+            intent.putExtra("tweet", myListTweets?.get(iterator))
+            intent.putExtra("user", myListTweets?.get(iterator)?.user)
             this.startActivity(intent)
 
             true
@@ -233,7 +243,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         imm.hideSoftInputFromWindow(windowToken, 0)
     }
 
-    fun isOnline(context: Context): Boolean {
+    private fun isOnline(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
