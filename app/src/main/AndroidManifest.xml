@@ -23,7 +23,10 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name="com.ajmorales.tweetToMap.view.MapsActivity">
+        <activity
+            android:name="com.ajmorales.tweetToMap.view.MapsActivity"
+            android:configChanges="orientation|screenLayout">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -13,17 +13,9 @@ import java.io.InputStreamReader
 
 class TweetRepositoryImpl : TweetRepository {
 
-
-    private var tweets =
-        MutableLiveData<List<Tweet>>() //Cualquier dato que pueda sudecer puede refescar a los demás "MutableLiveData", es parte del patrón observador.
-
+    private var tweets = MutableLiveData<List<Tweet>>()
     var responseStr: String? = "NO"
 
-
-    //Subject MutableLiveData
-    //Observers List tweet - Cuando la lista cambia va a afertar al estado del subjeto
-    //Change List tweet- MutableLiveData
-    //Observed - Actualizar los cambios dónde se esté llamando el método especial.
 
     override fun getTweets(): MutableLiveData<List<Tweet>> {
         return tweets
@@ -31,9 +23,7 @@ class TweetRepositoryImpl : TweetRepository {
 
     override fun callTweetsAPI(str: String) {
         val currentCall: Call<ResponseBody>? = ApiAdapter().api!!.getTweet(str)
-
         currentCall?.enqueue(streamResponse)
-
     }
 
     override fun getResponse(): String {
@@ -45,10 +35,8 @@ class TweetRepositoryImpl : TweetRepository {
 
             val tweetsList: ArrayList<Tweet>? = ArrayList<Tweet>()
 
-            Log.d("debug", "Getting data - ON RESPONSE")
-
             if (response.isSuccessful) {
-                Log.e("SUCCESS!", "Call OK")
+                Log.e("Response: ", "successful!!")
 
                 try {
                     val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
@@ -61,16 +49,17 @@ class TweetRepositoryImpl : TweetRepository {
 
                         if (j.getAsJsonObject("user") != null) {
                             val tweet = gson.fromJson(j, Tweet::class.java)
-
                             tweetsList?.add(tweet)
 
+                            //Show twitter parse by author without location
                             Log.d(
-                                "Searching location(",
+                                "Parsing..(",
                                 i.toString() + ") [Autor]:" + tweet.user?.name.toString()
                             )
 
+                            //Show twitter parse with locations
                             if (tweet.coordinates != null || tweet.geo != null) {
-                                //  Log.d("debug", "JSON: $j")
+                                //  Log.d("Parse", "JSON: $j")
 
                                 Log.d(
                                     "\n Location found!",
@@ -90,7 +79,7 @@ class TweetRepositoryImpl : TweetRepository {
                     responseStr = "DONE"
 
                 } catch (e: Exception) {
-                    Log.e("error", "ERROR : ${e.message}")
+                    Log.e("Error", "Exception in response : ${e.message}")
                     responseStr = e.message
                 }
 
@@ -102,12 +91,9 @@ class TweetRepositoryImpl : TweetRepository {
 
 
         override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-
-            Log.e("error", "onFailure call")
+            Log.e("Error", "onFailure")
         }
     }
-
-
 }
 
 

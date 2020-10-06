@@ -14,7 +14,7 @@ class MarkerDetail : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_marker_detail)
-        supportActionBar?.hide()
+        supportActionBar?.title = "Tweet detail"
 
         val imgProfile: ImageView = findViewById(R.id.imgProfile)
         val tvUserName: TextView = findViewById(R.id.tvUserName)

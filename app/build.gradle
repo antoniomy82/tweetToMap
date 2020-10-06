@@ -33,7 +33,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.1'
+    implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
     testImplementation 'junit:junit:4.13'
@@ -51,13 +51,12 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 
+    //Okhttp signpost
+    implementation 'se.akerfeldt:okhttp-signpost:1.1.0'
+
     //Twitter
     implementation 'com.twitter.sdk.android:twitter:3.1.1'
     implementation'com.twitter.sdk.android:twitter-core:3.1.1'
-
-    //Okhttp3 -- Ver
-    implementation 'se.akerfeldt:okhttp-signpost:1.1.0'
-    implementation 'oauth.signpost:signpost-core:1.2.1.2'
 
     //Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
