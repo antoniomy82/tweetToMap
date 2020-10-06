@@ -30,6 +30,7 @@ class ApiAdapter {
             .addInterceptor(SigningInterceptor(consumer))
             .build()
 
+
         val retrofit = Retrofit.Builder()
             .baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create())
