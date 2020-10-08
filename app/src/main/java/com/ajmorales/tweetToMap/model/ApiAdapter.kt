@@ -11,10 +11,10 @@ import java.util.concurrent.TimeUnit
 class ApiAdapter {
 
     //Twitter API Keys
-    private val apiKey = "RUkM3QSu5jV3CdyUjnitHVFtT"
-    private val apiSecret = "e3DVxZM8XOqFPWA9mYN7rW0NzuaGQSJCWD6sLYxr6e0WMnOy9h"
-    private val accessToken = "1310541059802509313-QtjoCoe5oMXiY3fsiXrvIgw54LVKF8"
-    private val accessTokenSecret = "slI2TpqjSgK1wK5ZTYzzjGqJVyVOscXyPb3xfkLY5GY5Q"
+    private val apiKey = "YOUR_API_KEY"
+    private val apiSecret = "YOUR_API_KEY"
+    private val accessToken = "YOUR_API_KEY"
+    private val accessTokenSecret = "YOUR_API_KEY"
 
     private val url = "https://stream.twitter.com/1.1/"
     var api: ApiService? = null
