@@ -1,35 +1,36 @@
 package com.ajmorales.tweetToMap.view
 
 import android.os.Bundle
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.ajmorales.tweetToMap.BR
 import com.ajmorales.tweetToMap.R
-import com.ajmorales.tweetToMap.model.Tweet
-import com.ajmorales.tweetToMap.model.User
+import com.ajmorales.tweetToMap.databinding.ActivityMarkerDetailBinding
+import com.ajmorales.tweetToMap.viewmodel.TweetViewModel
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.activity_marker_detail.*
 
 class MarkerDetail : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_marker_detail)
+
         supportActionBar?.title = "Tweet detail"
 
-        val imgProfile: ImageView = findViewById(R.id.imgProfile)
-        val tvUserName: TextView = findViewById(R.id.tvUserName)
-        val tvText: TextView = findViewById(R.id.tvText)
+        val binding: ActivityMarkerDetailBinding =
+            ActivityMarkerDetailBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val tweetSelected: Tweet? = intent.getParcelableExtra("tweet") as Tweet?
-        val userSelected: User? = intent.getParcelableExtra("user") as User?
+        val position = intent.getIntExtra("position", 0)
 
-        tvUserName.text = userSelected!!.name
-        tvText.text = tweetSelected!!.text
+        val model: TweetViewModel? = intent.getParcelableExtra("model")
 
-        if ((userSelected.profile_image_url) != null) {
-            Picasso.get().load(userSelected.profile_image_url)
-                .into(imgProfile)
+        binding.setVariable(BR.model, model)
+        binding.setVariable(BR.position, position)
 
+        model?.getMyTweet(position)?.user?.profile_image_url
+
+        if ((model?.getMyTweet(position)?.user?.profile_image_url) != null) {
+            Picasso.get().load(model.getMyTweet(position)?.user?.profile_image_url).into(imgProfile)
         } else {
             Picasso.get().load(R.drawable.noimage).into(imgProfile)
         }

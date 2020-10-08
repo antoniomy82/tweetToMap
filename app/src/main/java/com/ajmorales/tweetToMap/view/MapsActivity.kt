@@ -9,11 +9,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.ajmorales.tweetToMap.R
 import com.ajmorales.tweetToMap.model.Geo
-import com.ajmorales.tweetToMap.model.Tweet
 import com.ajmorales.tweetToMap.utils.Utils
 import com.ajmorales.tweetToMap.viewmodel.TweetViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -39,8 +37,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     var model: TweetViewModel? = null
     var util: Utils? = Utils()
 
-    private var myTweets: MutableLiveData<List<Tweet>>? = null
-    private var myListTweets: List<Tweet>? = null
+
+    //private var myListTweets: List<Tweet>? = null
     private var searchWord: String? = null
 
     private var progressBar: ProgressBar? = null
@@ -123,8 +121,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             if (util!!.isOnline(this)) {
                 //When the parsing process is done!
                 if (model?.getResponse()!!.contains("DONE")) {
-                    myTweets = model?.getTweets()
-                    myListTweets = myTweets?.value
+                    model?.myTweets = model?.getTweets()
+                    model!!.myTweetList = model?.myTweets?.value
                 }
 
                 if (iterator == 29) {
@@ -145,12 +143,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     ).show()
                 }
 
-                if (myListTweets?.size == 30) { //If there are tweets, it reload map
+                if (model!!.myTweetList?.size == 30) { //If there are tweets, it reload map
                     textVisible()
                     myMarker?.remove()
-
                     mapFragment?.getMapAsync(this)
-
+                    iterator++
+                    model!!.setIterator(iterator)
                 }
 
             } else {//No internet
@@ -181,25 +179,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         //If there are geo or coordinates
-        if (myListTweets?.get(iterator)?.geo?.coordinates?.get(0) != null && myListTweets?.get(
+        if (model!!.myTweetList?.get(iterator)?.geo?.coordinates?.get(0) != null && model!!.myTweetList?.get(
                 iterator
             )?.geo?.coordinates?.get(
                 1
             ) != null
         ) {
             myLatLon = LatLng(
-                myListTweets?.get(iterator)?.geo?.coordinates!![0],
-                myListTweets?.get(iterator)?.geo?.coordinates!![1]
+                model!!.myTweetList?.get(iterator)?.geo?.coordinates!![0],
+                model!!.myTweetList?.get(iterator)?.geo?.coordinates!![1]
             )
-        } else if (myListTweets?.get(iterator)?.coordinates?.coordinates?.get(0) != null && myListTweets?.get(
+        } else if (model!!.myTweetList?.get(iterator)?.coordinates?.coordinates?.get(0) != null && model!!.myTweetList?.get(
                 iterator
             )?.coordinates?.coordinates?.get(
                 1
             ) != null
         ) {
             myLatLon = LatLng(
-                myListTweets?.get(iterator)?.coordinates?.coordinates!![1],
-                myListTweets?.get(iterator)?.coordinates?.coordinates!![0]
+                model!!.myTweetList?.get(iterator)?.coordinates?.coordinates!![1],
+                model!!.myTweetList?.get(iterator)?.coordinates?.coordinates!![0]
             )
         } else { //Simulated location
             myLatLon = LatLng(
@@ -209,29 +207,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         //I add markter to map
-        if (myLocations != null && myListTweets?.get(iterator) != null) {
+        if (myLocations != null && model!!.myTweetList?.get(iterator) != null) {
             myMarker = googleMap?.addMarker(
                 MarkerOptions().position(myLatLon)
-                    .title(myListTweets?.get(iterator)?.user?.name)
+                    .title(model!!.myTweetList?.get(iterator)?.user?.name)
             )
             myMarker?.showInfoWindow()
 
             Log.d(
                 "Showing tweet:",
-                myListTweets?.get(iterator)?.user?.name.toString() + " [" + iterator + "]"
+                model!!.myTweetList?.get(iterator)?.user?.name.toString() + " [" + iterator + "]"
             )
 
             googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(myLatLon, zoom))
-
-            iterator++
-            model!!.setIterator(iterator)
         }
 
         //MarkerClickListener
         googleMap?.setOnMarkerClickListener {
             val intent = Intent(this, MarkerDetail::class.java)
-            intent.putExtra("tweet", myListTweets?.get(iterator))
-            intent.putExtra("user", myListTweets?.get(iterator)?.user)
+
+            intent.putExtra("position", iterator)
+            intent.putExtra("model", model)
             this.startActivity(intent)
 
             true
