@@ -22,8 +22,6 @@ class TweetViewModel() : ViewModel(), Parcelable {
 
     fun callTweets(word: String) {
         searchWord?.value = word
-
-
         tweetObservable.callTweets(word)
     }
 
@@ -55,6 +53,14 @@ class TweetViewModel() : ViewModel(), Parcelable {
         iterator?.value = iter
     }
 
+    /*
+      Binding
+    */
+
+
+    /*
+      Parcelable
+     */
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeTypedList(myTweetList)
     }
@@ -72,5 +78,6 @@ class TweetViewModel() : ViewModel(), Parcelable {
             return arrayOfNulls(size)
         }
     }
+
 
 }
