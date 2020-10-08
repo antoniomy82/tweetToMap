@@ -7,10 +7,14 @@ import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.ajmorales.tweetToMap.BR
 import com.ajmorales.tweetToMap.R
+import com.ajmorales.tweetToMap.databinding.ActivityMapsBinding
 import com.ajmorales.tweetToMap.model.Geo
 import com.ajmorales.tweetToMap.utils.Utils
 import com.ajmorales.tweetToMap.viewmodel.TweetViewModel
@@ -21,7 +25,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -37,42 +40,43 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     var model: TweetViewModel? = null
     var util: Utils? = Utils()
 
-
-    //private var myListTweets: List<Tweet>? = null
     private var searchWord: String? = null
-
-    private var progressBar: ProgressBar? = null
-    private var tvSearching: TextView? = null
-    private var tvLifespan: TextView? = null
-    private var btnSearch: Button? = null
-    private var edSearch: EditText? = null
-    private var spLifeSpan: Spinner? = null
     private var mapFragment: SupportMapFragment? = null
+    private var binding: ActivityMapsBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
+
         supportActionBar?.hide()
-        progressBar = findViewById<ProgressBar>(R.id.progressBar)
-        tvSearching = findViewById(R.id.tvSearching)
-        tvLifespan = findViewById(R.id.tvLifespan)
-        btnSearch = findViewById(R.id.btnSearch)
-        edSearch = findViewById(R.id.etSearch)
 
-        tvSearching?.visibility = View.GONE
-        progressBar?.visibility = View.GONE
-
-        mapFragment = supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-        //To preserve data in case to switch portrait to landscape - LifeCycle
+        //To preserve data - LifeCycle
         model = ViewModelProvider(this).get(TweetViewModel::class.java)
 
+        binding = ActivityMapsBinding.inflate(layoutInflater)
+        setContentView(binding?.root)
+
+        binding?.setVariable(
+            BR.mapFragment,
+            supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+        ) //Map fragment
+        mapFragment = binding?.mapFragment//Map fragment
+
+        setupView()
+    }
+
+
+    private fun setupView() {
+        binding?.tvSearchingVisibility = false
+        binding?.progressBarVisibility = false
+        binding?.searchingElementsVisibility =
+            true  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
+
         //Lifespan spinner
-        spLifeSpan = findViewById(R.id.sp_lifespan)
         val lifeSpanList: List<Int> = listOf(5, 7, 9, 10, 12, 15)
         val spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lifeSpanList)
-        spLifeSpan?.adapter = spAdapter
+        binding?.spLifespan?.adapter = spAdapter
 
-        spLifeSpan?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding?.spLifespan?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
                 lifeSpan = (lifeSpanList[position] * 1000.toLong())
             }
@@ -81,22 +85,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-
         //Search button
-        btnSearch?.setOnClickListener {
+        binding?.btnSearch?.setOnClickListener {
 
             if (!util!!.isOnline(this)) {
-                textInVisible()
-                tvSearching?.text = getString(R.string.tvCheckConnection)
+                binding?.searchingElementsVisibility =
+                    false  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
+                binding?.setVariable(BR.tvSearching, getString(R.string.tvCheckConnection))
+                binding?.tvSearchingVisibility = true
+
                 Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_SHORT).show()
             } else {
-                textInVisible()
-                tvSearching?.text = getString(R.string.tvSearchingConnection)
-                tvSearching?.visibility = View.VISIBLE
-                progressBar?.visibility = View.VISIBLE
+                binding?.searchingElementsVisibility =
+                    false  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
+                binding?.etSearch?.hideKeyboard()
+                binding?.tvSearchingVisibility = true //Visible tvSearching
+                binding?.setVariable(BR.tvSearching, getString(R.string.tvSearchingConnection))
+                binding?.progressBarVisibility = true
                 iterator = 0
-                searchWord = edSearch?.text.toString()
-                model!!.callTweets(edSearch?.text.toString()) //ViewModel @@@
+
+                searchWord = binding?.etSearch?.text.toString()
+                model!!.callTweets(binding?.etSearch?.text.toString()) //ViewModel @@@
             }
         }
 
@@ -119,6 +128,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             handler.postDelayed(runnable!!, lifeSpan)
 
             if (util!!.isOnline(this)) {
+                binding?.searchingElementsVisibility =
+                    true  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
                 //When the parsing process is done!
                 if (model?.getResponse()!!.contains("DONE")) {
                     model?.myTweets = model?.getTweets()
@@ -128,7 +139,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (iterator == 29) {
                     iterator = 0
                     model!!.setIterator(iterator)
-                    model!!.callTweets(edSearch?.text.toString()) //Automatically relaunch
+                    model!!.callTweets(binding?.etSearch?.text.toString()) //Automatically relaunch
                 }
 
                 //Warning response 420
@@ -144,7 +155,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
 
                 if (model!!.myTweetList?.size == 30) { //If there are tweets, it reload map
-                    textVisible()
+
+                    binding?.searchingElementsVisibility =
+                        true  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
+                    binding?.tvSearchingVisibility = false
+                    binding?.progressBarVisibility = false
+
                     myMarker?.remove()
                     mapFragment?.getMapAsync(this)
                     iterator++
@@ -152,9 +168,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
 
             } else {//No internet
-                textInVisible()
-                tvSearching?.visibility = View.VISIBLE
-                tvSearching?.text = getString(R.string.tvCheckConnection)
+                binding?.searchingElementsVisibility =
+                    false  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
+                binding?.tvSearchingVisibility = true
+                binding?.setVariable(BR.tvSearching, getString(R.string.tvCheckConnection))
+
                 Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_SHORT).show()
                 myMarker?.remove()
             }
@@ -225,7 +243,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //MarkerClickListener
         googleMap?.setOnMarkerClickListener {
             val intent = Intent(this, MarkerDetail::class.java)
-
             intent.putExtra("position", iterator)
             intent.putExtra("model", model)
             this.startActivity(intent)
@@ -237,23 +254,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun View.hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(windowToken, 0)
-    }
-
-    private fun textVisible() {
-        spLifeSpan?.visibility = View.VISIBLE
-        tvLifespan?.visibility = View.VISIBLE
-        btnSearch?.visibility = View.VISIBLE
-        edSearch?.visibility = View.VISIBLE
-        tvSearching?.visibility = View.GONE
-        progressBar?.visibility = View.GONE
-    }
-
-    private fun textInVisible() {
-        edSearch?.hideKeyboard()
-        spLifeSpan?.visibility = View.GONE
-        tvLifespan?.visibility = View.GONE
-        btnSearch?.visibility = View.GONE
-        edSearch?.visibility = View.GONE
     }
 }
 

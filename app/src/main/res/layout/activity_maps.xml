@@ -5,9 +5,52 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
-            name="myViewModel"
+            name="model"
             type="com.ajmorales.tweetToMap.viewmodel.TweetViewModel" />
+
+        <variable
+            name="mapFragment"
+            type="com.google.android.gms.maps.SupportMapFragment" />
+
+        <variable
+            name="progressBar"
+            type="android.widget.ProgressBar" />
+
+        <variable
+            name="progressBarVisibility"
+            type="Boolean" />
+
+        <variable
+            name="tvSearching"
+            type="String" />
+
+        <variable
+            name="tvSearchingVisibility"
+            type="Boolean" />
+
+        <variable
+            name="etSearch"
+            type="android.widget.EditText" />
+
+        <variable
+            name="btnSearch"
+            type="android.widget.Button" />
+
+        <variable
+            name="spLifeSapn"
+            type="android.widget.Spinner" />
+
+        <variable
+            name="searchingElementsVisibility"
+            type="Boolean" />
+
+        <variable
+            name="tvLifeSpan"
+            type="android.widget.TextView" />
+
 
     </data>
 
@@ -18,7 +61,7 @@
         tools:context=".view.MapsActivity">
 
 
-        <EditText
+        <android.widget.EditText
             android:id="@+id/etSearch"
             android:layout_width="217dp"
             android:layout_height="42dp"
@@ -30,9 +73,10 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.172"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="@{searchingElementsVisibility?  View.VISIBLE : View.GONE }" />
 
-        <Spinner
+        <android.widget.Spinner
             android:id="@+id/sp_lifespan"
             android:layout_width="96dp"
             android:layout_height="44dp"
@@ -41,9 +85,10 @@
             app:layout_constraintHorizontal_bias="0.125"
             app:layout_constraintStart_toEndOf="@+id/tvLifespan"
             app:layout_constraintTop_toBottomOf="@+id/etSearch"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.0"
+            android:visibility="@{searchingElementsVisibility?  View.VISIBLE : View.GONE }" />
 
-        <Button
+        <android.widget.Button
             android:id="@+id/btnSearch"
             android:layout_width="83dp"
             android:layout_height="42dp"
@@ -51,9 +96,10 @@
             android:layout_marginTop="16dp"
             android:text="@string/btnSearch"
             app:layout_constraintStart_toEndOf="@+id/etSearch"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="@{searchingElementsVisibility?  View.VISIBLE : View.GONE }" />
 
-        <TextView
+        <android.widget.TextView
             android:id="@+id/tvLifespan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -61,14 +107,15 @@
             android:layout_marginTop="8dp"
             android:text="@string/tvLifeSpan"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etSearch" />
+            app:layout_constraintTop_toBottomOf="@+id/etSearch"
+            android:visibility="@{searchingElementsVisibility?  View.VISIBLE : View.GONE }" />
 
-        <TextView
+        <android.widget.TextView
             android:id="@+id/tvSearching"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            android:text="@string/tvSearching"
+            android:text="@{tvSearching}"
             android:textAlignment="center"
             android:textColor="#E57373"
             android:textSize="20sp"
@@ -77,9 +124,11 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.021" />
+            app:layout_constraintVertical_bias="0.021"
+            android:visibility="@{tvSearchingVisibility?  View.VISIBLE : View.GONE }" />
 
-        <ProgressBar
+
+        <android.widget.ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyle"
             android:layout_width="150dp"
@@ -92,7 +141,8 @@
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.063" />
+            app:layout_constraintVertical_bias="0.063"
+            android:visibility="@{progressBarVisibility?  View.VISIBLE : View.GONE }" />
 
         <LinearLayout
             android:id="@+id/linearLayout2"
