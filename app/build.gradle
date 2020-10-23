@@ -35,7 +35,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -45,11 +45,11 @@ dependencies {
 
     //Retrofit
     //noinspection GradleDependency
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
 
     //Gson
     //noinspection GradleDependency
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
 
     //Okhttp signpost
     implementation 'se.akerfeldt:okhttp-signpost:1.1.0'
@@ -66,5 +66,8 @@ dependencies {
 
     //lifeCycle
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+
+    //Coroutine
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9"
 
 }
