@@ -53,10 +53,6 @@ class TweetViewModel() : ViewModel(), Parcelable {
         iterator?.value = iter
     }
 
-    /*
-      Binding
-    */
-
 
     /*
       Parcelable

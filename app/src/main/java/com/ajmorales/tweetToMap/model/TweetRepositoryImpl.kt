@@ -39,6 +39,7 @@ class TweetRepositoryImpl : TweetRepository {
 
             if (response.isSuccessful) {
                 Log.e("Response: ", "successful!!")
+                responseStr = "UPDATE"
 
                 try {
                     val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
@@ -89,6 +90,7 @@ class TweetRepositoryImpl : TweetRepository {
                 responseStr = "WARNING" + response.toString()
                 Log.e("Warning:", "[Warning] " + response.toString())
             }
+
         }
 
 

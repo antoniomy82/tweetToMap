@@ -131,18 +131,17 @@
         <android.widget.ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyle"
-            android:layout_width="150dp"
-            android:layout_height="43dp"
-            android:indeterminate="true"
-            android:max="100"
-            android:progress="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="@{progressBarVisibility?  View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintHorizontal_bias="0.521"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.063"
-            android:visibility="@{progressBarVisibility?  View.VISIBLE : View.GONE }" />
+            app:layout_constraintVertical_bias="0.023" />
 
         <LinearLayout
             android:id="@+id/linearLayout2"

@@ -25,7 +25,7 @@
 
         <activity
             android:name="com.ajmorales.tweetToMap.view.MapsActivity"
-            android:configChanges="orientation|screenLayout">
+            android:configChanges="orientation|screenLayout|screenSize">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

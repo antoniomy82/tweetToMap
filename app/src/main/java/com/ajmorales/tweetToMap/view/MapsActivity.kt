@@ -25,6 +25,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.snackbar.Snackbar
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -33,14 +34,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var runnable: Runnable? = null
 
     var lifeSpan: Long = 5000
-    var iterator: Int = 0
 
     private var myLocations: ArrayList<Geo>? = ArrayList<Geo>()
     private var myMarker: Marker? = null
     var model: TweetViewModel? = null
-    var util: Utils? = Utils()
+    private var util: Utils? = Utils()
 
-    private var searchWord: String? = null
     private var mapFragment: SupportMapFragment? = null
     private var binding: ActivityMapsBinding? = null
 
@@ -61,14 +60,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ) //Map fragment
         mapFragment = binding?.mapFragment//Map fragment
 
+        myLocations = util?.getSimulatedLocations() //load simulated locations
+
         setupView()
     }
 
 
-    fun setupView() {
+    private fun setupView() {
 
-        binding?.tvSearchingVisibility = false
-        binding?.progressBarVisibility = false
         binding?.searchingElementsVisibility =
             true  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
 
@@ -90,35 +89,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding?.btnSearch?.setOnClickListener {
 
             if (!util!!.isOnline(this)) {
-                binding?.searchingElementsVisibility =
-                    false  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
-                binding?.setVariable(BR.tvSearching, getString(R.string.tvCheckConnection))
+
+                // binding?.setVariable(BR.tvSearching, getString(R.string.tvCheckConnection))
                 binding?.tvSearchingVisibility = true
-
-                Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_SHORT).show()
+                binding?.root?.snack(getString(R.string.tvCheckConnection))
             } else {
-                binding?.searchingElementsVisibility =
-                    false  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
-                binding?.etSearch?.hideKeyboard()
-                binding?.tvSearchingVisibility = true //Visible tvSearching
-                binding?.setVariable(BR.tvSearching, getString(R.string.tvSearchingConnection))
-                binding?.progressBarVisibility = true
-                iterator = 0
 
-                searchWord = binding?.etSearch?.text.toString()
-                model!!.callTweets(binding?.etSearch?.text.toString()) //ViewModel @@@
+                binding?.etSearch?.hideKeyboard()
+                binding?.root?.snack(getString(R.string.tvSearchingConnection))
+                binding?.progressBarVisibility = true
+
+                model?.callTweets(binding?.etSearch?.text.toString()) //ViewModel @@@
             }
         }
 
-        myLocations = util?.getSimulatedLocations() //load simulated locations
+
     }
 
     //Refresh mapFragment when change landscape to portrait
     override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
+
         myMarker?.remove()
         mapFragment?.getMapAsync(this)
-
+        super.onConfigurationChanged(newConfig)
     }
 
     //Here is the action :-)
@@ -129,57 +122,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             handler.postDelayed(runnable!!, lifeSpan)
 
             if (util!!.isOnline(this)) {
-                binding?.searchingElementsVisibility =
-                    true  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
-                //When the parsing process is done!
-                if (model?.getResponse()!!.contains("DONE")) {
-                    model?.myTweets = model?.getTweets()
-                    model!!.myTweetList = model?.myTweets?.value
-                }
 
-                if (iterator == 29) {
-                    iterator = 0
-                    model!!.setIterator(iterator)
-                    model!!.callTweets(binding?.etSearch?.text.toString()) //Automatically relaunch
-                }
-
-                //Warning response 420
-                val timeRemaining =
-                    ((lifeSpan / 1000).toInt() * 30) - ((lifeSpan / 1000).toInt() * iterator)
-                if (model?.getResponse()!!.contains("code=420")) {
-
-                    Toast.makeText(
-                        this,
-                        "420 Enhance Your Calm:\n Returned by the Twitter Search and Trends API when the client is being rate limited.\n Get a professional API or try increasing the lifespan \n Showing previous tweets!! \n ¡Merezco el curro por los dolores de cabeza! -> API HORRIBLE :-) \n\n Relauching call in: " + timeRemaining.toString() + " sec",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                if (model!!.myTweetList?.size == 30) { //If there are tweets, it reload map
-
-                    binding?.searchingElementsVisibility =
-                        true  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
-                    binding?.tvSearchingVisibility = false
-                    binding?.progressBarVisibility = false
-
-                    myMarker?.remove()
-                    mapFragment?.getMapAsync(this)
-                    iterator++
-                    model!!.setIterator(iterator)
-                }
+                apiResponses()
 
             } else {//No internet
-                binding?.searchingElementsVisibility =
-                    false  // spLifespan, tvLifespan? ,btnSearch? , edSearch?.visibility
-                binding?.tvSearchingVisibility = true
-                binding?.setVariable(BR.tvSearching, getString(R.string.tvCheckConnection))
 
-                Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_SHORT).show()
+                binding?.root?.snack(getString(R.string.tvCheckConnection))
                 myMarker?.remove()
             }
 
         }.also { runnable = it }, lifeSpan)
-
     }
 
     override fun onPause() {
@@ -193,30 +145,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         googleMap?.uiSettings?.isZoomControlsEnabled = true //Zoom in/out
         val myLatLon: LatLng
 
-        if (model!!.callIterator()?.value != null) {
-            iterator = model!!.callIterator()?.value!!
+        var iterator = 0
+        if (model?.callIterator()?.value != null) {
+            iterator = model?.callIterator()?.value!!
         }
 
         //If there are geo or coordinates
-        if (model!!.myTweetList?.get(iterator)?.geo?.coordinates?.get(0) != null && model!!.myTweetList?.get(
+        if (model?.myTweetList?.get(iterator)?.geo?.coordinates?.get(0) != null && model?.myTweetList?.get(
                 iterator
             )?.geo?.coordinates?.get(
                 1
             ) != null
         ) {
             myLatLon = LatLng(
-                model!!.myTweetList?.get(iterator)?.geo?.coordinates!![0],
-                model!!.myTweetList?.get(iterator)?.geo?.coordinates!![1]
+                model?.myTweetList?.get(iterator)?.geo?.coordinates!![0],
+                model?.myTweetList?.get(iterator)?.geo?.coordinates!![1]
             )
-        } else if (model!!.myTweetList?.get(iterator)?.coordinates?.coordinates?.get(0) != null && model!!.myTweetList?.get(
+        } else if (model?.myTweetList?.get(iterator)?.coordinates?.coordinates?.get(0) != null && model?.myTweetList?.get(
                 iterator
             )?.coordinates?.coordinates?.get(
                 1
             ) != null
         ) {
             myLatLon = LatLng(
-                model!!.myTweetList?.get(iterator)?.coordinates?.coordinates!![1],
-                model!!.myTweetList?.get(iterator)?.coordinates?.coordinates!![0]
+                model?.myTweetList?.get(iterator)?.coordinates?.coordinates!![1],
+                model?.myTweetList?.get(iterator)?.coordinates?.coordinates!![0]
             )
         } else { //Simulated location
             myLatLon = LatLng(
@@ -226,16 +179,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         //I add markter to map
-        if (myLocations != null && model!!.myTweetList?.get(iterator) != null) {
+        if (myLocations != null && model?.myTweetList?.get(iterator) != null) {
             myMarker = googleMap?.addMarker(
                 MarkerOptions().position(myLatLon)
-                    .title(model!!.myTweetList?.get(iterator)?.user?.name)
+                    .title(model?.myTweetList?.get(iterator)?.user?.name)
             )
             myMarker?.showInfoWindow()
 
             Log.d(
                 "Showing tweet:",
-                model!!.myTweetList?.get(iterator)?.user?.name.toString() + " [" + iterator + "]"
+                model?.myTweetList?.get(iterator)?.user?.name.toString() + " [" + iterator + "]"
             )
 
             googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(myLatLon, zoom))
@@ -252,10 +205,68 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+
+    private fun apiResponses() {
+        var iterator = 0
+        if (model?.callIterator()?.value != null) {
+            iterator = model!!.callIterator()?.value!!
+        }
+
+        //When the parsing process is done!
+        if (model?.getResponse()!!
+                .contains("DONE") && model?.myTweets == null && model?.myTweetList == null
+        ) {
+            binding?.progressBarVisibility = false
+            model?.myTweets = model?.getTweets()
+            model?.myTweetList = model?.myTweets?.value
+        }
+
+        if (model?.getResponse()!!.contains("UPDATE")) {
+            binding?.progressBarVisibility = true
+            binding?.root?.snack(getString(R.string.tvSearchingConnection))
+        }
+
+        //Warning response 420 , Update map and increase iterator
+        if (model?.getResponse()!!.contains("code=420") || model?.getResponse()!!
+                .contains("DONE")
+        ) {
+            binding?.progressBarVisibility = false
+            myMarker?.remove()
+            mapFragment?.getMapAsync(this)
+            iterator++
+            model?.setIterator(iterator)
+
+            if (model?.getResponse()!!.contains("code=420")) {
+                val timeRemaining =
+                    ((lifeSpan / 1000).toInt() * 30) - ((lifeSpan / 1000).toInt() * iterator)
+                Toast.makeText(
+                    this,
+                    "420 Enhance Your Calm:\n Returned by the Twitter Search and Trends API when the client is being rate limited.\n Get a professional API or try increasing the lifespan \n Showing previous tweets!! \n ¡Merezco el curro por los dolores de cabeza! -> API HORRIBLE :-) \n\n Relauching call in: " + timeRemaining.toString() + " sec",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        if (iterator == 29) {
+            iterator = 0
+            if (model?.getResponse()!!.contains("DONE")) {
+                model?.myTweets = null
+                model?.myTweetList = null
+            }
+            model?.setIterator(iterator)
+            model?.callTweets(binding?.etSearch?.text.toString()) //Automatically relaunch
+        }
+    }
+
+    private fun View.snack(message: String, duration: Int = Snackbar.LENGTH_LONG) {
+        Snackbar.make(this, message, duration).show()
+    }
+
     private fun View.hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(windowToken, 0)
     }
+
 }
 
 
