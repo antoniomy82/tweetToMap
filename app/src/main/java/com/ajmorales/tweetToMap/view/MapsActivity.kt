@@ -66,6 +66,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     fun setupView() {
+
         binding?.tvSearchingVisibility = false
         binding?.progressBarVisibility = false
         binding?.searchingElementsVisibility =

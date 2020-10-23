@@ -5,6 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.stream.JsonReader
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -42,36 +44,36 @@ class TweetRepositoryImpl : TweetRepository {
                     val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
                     val gson = GsonBuilder().create()
 
-                    var i = 0
+                    GlobalScope.launch {
+                        for (i in 0..29) {
+                            val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
 
-                    while (i < 30) {
-                        val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
+                            if (j.getAsJsonObject("user") != null) {
+                                val tweet = gson.fromJson(j, Tweet::class.java)
+                                tweetsList?.add(tweet)
 
-                        if (j.getAsJsonObject("user") != null) {
-                            val tweet = gson.fromJson(j, Tweet::class.java)
-                            tweetsList?.add(tweet)
-
-                            //Show twitter parse by author without location
-                            Log.d(
-                                "Parsing..(",
-                                i.toString() + ") [Autor]:" + tweet.user?.name.toString()
-                            )
-
-                            //Show twitter parse with locations
-                            if (tweet.coordinates != null || tweet.geo != null) {
-                                //  Log.d("Parse", "JSON: $j")
-
+                                //Show twitter parse by author without location
                                 Log.d(
-                                    "\n Location found!",
-                                    tweet.user?.name.toString() + " GEO: [" + tweet.geo?.coordinates?.get(
-                                        0
-                                    ) + "," + tweet.geo?.coordinates?.get(1) + "] Coordinates [" +
-                                            tweet.coordinates?.coordinates?.get(0) + "," + tweet.coordinates?.coordinates?.get(
-                                        1
-                                    ) + "]\n[Text:]" + tweet.text
+                                    "Parsing..(",
+                                    i.toString() + ") [Autor]:" + tweet.user?.name.toString()
                                 )
+
+                                //Show twitter parse with locations
+                                if (tweet.coordinates != null || tweet.geo != null) {
+                                    //  Log.d("Parse", "JSON: $j")
+
+                                    Log.d(
+                                        "\n Location found!",
+                                        tweet.user?.name.toString() + " GEO: [" + tweet.geo?.coordinates?.get(
+                                            0
+                                        ) + "," + tweet.geo?.coordinates?.get(1) + "] Coordinates [" +
+                                                tweet.coordinates?.coordinates?.get(0) + "," + tweet.coordinates?.coordinates?.get(
+                                            1
+                                        ) + "]\n[Text:]" + tweet.text
+                                    )
+                                }
+
                             }
-                            i++
                         }
                     }
 
