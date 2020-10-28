@@ -67,3 +67,28 @@ How to get twitter Api Key:&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; http
 ## Architecture
 
 <img scr=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/mvvm.png>
+
+## Preliminary considerations
+
+With the **free Twitter API Key**, you may have the following problems:
+
+**A.	NO LOCATIONS**
+
+In the 99,96% of the analysed tweets, there isn´t location data.
+Therefore, to carry out the Project I have used simulated locations. 
+For the cases where tweets have no location, I have assigned them a mock location.
+
+**B.	RATE LIMITED**
+
+When you make several request in a row, twitter denies you the service. 
+
+See Twitter documentation:
+
+https://developer.twitter.com/en/docs/twitter-api/v1/rate-limits#:~:text=Standard%20API%20v1.&text=You%20can%20only%20post%20300,id%20endpoint%20during%20that%20period.
+
+To solve this problem, I catch tweets from 30 in 30. Even so, there are times when it gives the 420 error, if many requests are made in a row.
+
+For the latter case, I show the previous tweets and don't start the request until after multiplying "lifetime" by 30, to increase the time until a new request is made.
+
+
+<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/03_420.png>
