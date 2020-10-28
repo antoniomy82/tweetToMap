@@ -9,10 +9,11 @@ The app will consist of two views.
 -	The second screen will be displayed when the user clicks on any of the map pins. Then, the user should navigate to a new view, where the tweet’s details are shown.
 
 ## Technical specifications
+
+
 - Kotlin programming language
 
 - Development environment:
-
     - Android Studio 4.0.1
     - Build #AI-193.6911.18.40.6626763, built on June 25, 2020
     - Runtime version: 1.8.0_242-release-1644-b01 amd64
