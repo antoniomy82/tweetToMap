@@ -5,7 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.stream.JsonReader
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -18,6 +20,7 @@ class TweetRepositoryImpl : TweetRepository {
     private var tweets = MutableLiveData<List<Tweet>>()
     var responseStr: String? = "NO"
 
+    val parseScope = CoroutineScope(Dispatchers.IO)
 
     override fun getTweets(): MutableLiveData<List<Tweet>> {
         return tweets
@@ -41,11 +44,12 @@ class TweetRepositoryImpl : TweetRepository {
                 Log.e("Response: ", "successful!!")
                 responseStr = "UPDATE"
 
-                try {
-                    val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
-                    val gson = GsonBuilder().create()
 
-                    GlobalScope.launch {
+                    try {
+                        val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
+                        val gson = GsonBuilder().create()
+
+                        parseScope.launch {
                         for (i in 0..29) {
                             val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
 
@@ -76,19 +80,21 @@ class TweetRepositoryImpl : TweetRepository {
 
                             }
                         }
+                     }
+                        tweets.value = tweetsList
+                        responseStr = "DONE"
+
+
+                    } catch (e: Exception) {
+                        Log.e("Error", "Exception in response : ${e.message}")
+                        responseStr = e.message
+                       parseScope.cancel()
                     }
 
-                    tweets.value = tweetsList
-                    responseStr = "DONE"
-
-                } catch (e: Exception) {
-                    Log.e("Error", "Exception in response : ${e.message}")
-                    responseStr = e.message
-                }
 
             } else {
-                responseStr = "WARNING" + response.toString()
-                Log.e("Warning:", "[Warning] " + response.toString())
+                responseStr = "WARNING$response"
+                Log.e("Warning:", "[Warning] $response")
             }
 
         }
