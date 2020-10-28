@@ -8,6 +8,8 @@ The app will consist of two views.
 - The first one will host two elements: one input text field and a map that will display a pin for each tweet that is being produced in real time and that contains the text input by the user. Each pin should be displayed during a customizable lifespan.
 -	The second screen will be displayed when the user clicks on any of the map pins. Then, the user should navigate to a new view, where the tweet’s details are shown.
 
+**MVVM, DataBinding , Livedata, Retrofit2, Coroutine.  
+
 ## Technical specifications
 
 
