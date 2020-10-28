@@ -57,16 +57,17 @@ How to get twitter Api Key:&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; http
 
 **Step 1:** Enter a word, select lifespan and press search
 
-<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/00_start.png>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/00_start.png>
 
 ***
 **Step 2:** Click on a mark to see the information of its tweet.
 
-<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/01_run.png>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/01_run.png>
 
 ## Architecture
 
-<img scr=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/02_mvvm.png>
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/02_mvvm.png>
 
 ## Preliminary considerations
 
@@ -91,4 +92,4 @@ To solve this problem, I catch tweets from 30 in 30. Even so, there are times wh
 For the latter case, I show the previous tweets and don't start the request until after multiplying "lifetime" by 30, to increase the time until a new request is made.
 
 
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/03_420.png>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/03_420.png>
