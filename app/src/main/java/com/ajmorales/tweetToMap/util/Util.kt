@@ -1,12 +1,18 @@
-package com.ajmorales.tweetToMap.utils
+package com.ajmorales.tweetToMap.util
 
 import android.content.Context
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
+import android.widget.Toast
 import com.ajmorales.tweetToMap.model.Geo
+import com.google.android.material.snackbar.Snackbar
 
-class Utils {
+class Util {
 
     fun isOnline(context: Context): Boolean {
         val connectivityManager =
@@ -31,7 +37,7 @@ class Utils {
         return false
     }
 
-
+  //Emulated coordinates (Tweeter Api free)
     fun getSimulatedLocations(): ArrayList<Geo> {
 
         val locationLits: ArrayList<Geo> = ArrayList<Geo>()
@@ -68,5 +74,28 @@ class Utils {
         locationLits.add(Geo("Helsinki", listOf(60.16952, 24.93545)))
 
         return locationLits
+    }
+
+    fun onSnack(view: View, message: String, lifeSpan: Long){
+        //Snackbar(view)
+        val snackbar = Snackbar.make(view, message, lifeSpan.toInt())
+
+        val snackbarView = snackbar.view
+        snackbarView.setBackgroundColor(Color.BLACK)
+
+        val textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
+        textView.setTextColor(Color.RED)
+
+        textView.textSize = 20f
+        snackbar.show()
+    }
+
+    fun onToast(msg:String, context: Context){
+        Toast.makeText(context,msg, Toast.LENGTH_SHORT).show()
+    }
+
+    fun hideKeyboard(context: Context, view: View) {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }

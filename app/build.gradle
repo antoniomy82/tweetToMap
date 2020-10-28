@@ -15,6 +15,17 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        //GoogleMaps ApiKey
+        manifestPlaceholders =[GoogleMapsApiKey:"PUT_YOUR_API_KEY"] //Google Maps Api Key
+
+        //Tweeter Api Keys
+        buildTypes.each {
+            it.buildConfigField 'String', 'TwitterApiKey', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterApiSecret', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterAccessToken ', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterAccessTokenSecret ', '"PUT_YOUR_API_KEY"'
+        }
     }
 
     buildTypes {
@@ -27,6 +38,15 @@ android {
     buildFeatures{
         dataBinding = true
         viewBinding = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }
 
@@ -45,12 +65,10 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
 
     //Retrofit
-    //noinspection GradleDependency
-    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.8.1'
 
     //Gson
-    //noinspection GradleDependency
-    implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
+    implementation 'com.squareup.retrofit2:converter-gson:2.8.1'
 
     //Okhttp signpost
     implementation 'se.akerfeldt:okhttp-signpost:1.1.0'

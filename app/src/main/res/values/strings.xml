@@ -13,7 +13,5 @@
     <string name="tvCheckConnection">CHECK YOUR CONNECTION</string>
     <string name="tvSearchingConnection">Updating data</string>
 
-
-    <string name="google_maps_key">AIzaSyDKF0pORukA3ZIyTK772JsKWAxheSiGCc8</string>
-
 </resources>
+
