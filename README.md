@@ -66,4 +66,4 @@ How to get twitter Api Key:&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; http
 
 ## Architecture
 
-<img scr=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/Architecture.png>
+<img scr=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/architecture.png>
