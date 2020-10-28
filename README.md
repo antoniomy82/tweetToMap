@@ -1,6 +1,7 @@
 # tweetToMap
 
 ##Introduction
+
 A a simple application that displays tweets as pins on a map in real time according to a search term.
 
 The app will consist of two views.
