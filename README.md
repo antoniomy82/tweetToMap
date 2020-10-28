@@ -35,17 +35,17 @@ The app will consist of two views.
 
 ## HOW TO USE
 
-In build.gradle(Module:twittApp.app)  line 19 to 28
+Put your API Keys (Twitter & Google Maps) in build.gradle(Module:twittApp.app)  line 19 to 28
 
         //GoogleMaps ApiKey
         manifestPlaceholders =[GoogleMapsApiKey:"PUT_YOUR_API_KEY"] //Google Maps Api Key
 
         //Tweeter Api Keys
         buildTypes.each {
-            it.buildConfigField 'String', 'TweeterApiKey', '"PUT_YOUR_API_KEY"'
-            it.buildConfigField 'String', 'TweeterApiSecret', '"PUT_YOUR_API_KEY"'
-            it.buildConfigField 'String', 'TweeterAccessToken ', '"PUT_YOUR_API_KEY"'
-            it.buildConfigField 'String', 'TweeterAccessTokenSecret ', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterApiKey', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterApiSecret', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterAccessToken ', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterAccessTokenSecret ', '"PUT_YOUR_API_KEY"'
         }
 
 How to get google maps Api key : &nbsp; https://developers.google.com/maps/documentation/android-sdk/get-api-key
