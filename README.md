@@ -33,7 +33,7 @@ The app will consist of two views.
        - lifecycle-extensions:2.2.0 : Lifecycle
        - kotlinx-coroutines-core:1.3.9 : Kotlin coroutines
 
-## HOW TO USE
+## How to use
 
 Put your API Keys (Twitter & Google Maps) in build.gradle(Module:twittApp.app)  line 19 to 28
 
@@ -51,3 +51,19 @@ Put your API Keys (Twitter & Google Maps) in build.gradle(Module:twittApp.app)  
 How to get google maps Api key : &nbsp; https://developers.google.com/maps/documentation/android-sdk/get-api-key
 
 How to get twitter Api Key:&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; https://developer.twitter.com/en/docs/apps/overview
+
+
+## Story board
+
+**Step 1:** Enter a word, select lifespan and press search
+
+<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/00_start.png>
+
+***
+**Step 2:** Click on a mark to see the information of its tweet.
+
+<img src=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/01_run.png>
+
+## Architecture
+
+<img scr=https://github.com/antoniomy82/tweetToMap/blob/master/Screenshots/Architecture.png>
