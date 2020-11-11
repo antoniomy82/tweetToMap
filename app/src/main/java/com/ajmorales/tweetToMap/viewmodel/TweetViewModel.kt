@@ -52,6 +52,7 @@ class TweetViewModel() : ViewModel(), Parcelable {
     }
 
     fun callIterator(): MutableLiveData<Int>? {
+
         if (iterator == null) {
             iterator = MutableLiveData<Int>()
             iterator?.value = 0
@@ -62,11 +63,13 @@ class TweetViewModel() : ViewModel(), Parcelable {
 
   //Logic according to the Tweeter API answer
    fun apiResponses(binding: ActivityMapsBinding?, context: Context):Boolean {
-        var iterator = 0
+      var iterator:Int
 
-        if (callIterator()?.value != null) {
-            iterator = callIterator()?.value!!
-        }
+
+      callIterator()?.value.let {
+          iterator = callIterator()?.value!!
+      }
+
 
         //When the parsing process is done!
         if (getResponse().contains("DONE") && myTweets == null && myTweetList == null) {
@@ -88,7 +91,7 @@ class TweetViewModel() : ViewModel(), Parcelable {
         if (getResponse().contains("code=420") || getResponse().contains("DONE")) {
             binding?.progressBarVisibility = false
 
-            if (iterator <  myTweetList?.size!!-1) {
+            if (iterator <  myTweetList?.size ?:1) {
                 iterator++
                 setIterator(iterator)
             }
@@ -170,8 +173,8 @@ class TweetViewModel() : ViewModel(), Parcelable {
         binding?.btnSearch?.setOnClickListener {
 
             if (!util.isOnline(context)) {
-
                 // binding?.setVariable(BR.tvSearching, getString(R.string.tvCheckConnection))
+                util.hideKeyboard(context, binding.etSearch)
                 util.onSnack(binding.root,"CHECK YOUR CONNECTION",lifeSpan)
 
             } else {
@@ -208,3 +211,7 @@ class TweetViewModel() : ViewModel(), Parcelable {
         }
     }
 }
+
+
+
+

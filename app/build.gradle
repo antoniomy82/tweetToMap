@@ -17,14 +17,14 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         //GoogleMaps ApiKey
-        manifestPlaceholders =[GoogleMapsApiKey:"PUT_YOUR_API_KEY"] //Google Maps Api Key
+        manifestPlaceholders =[GoogleMapsApiKey:"AIzaSyDKF0pORukA3ZIyTK772JsKWAxheSiGCc8"] //Google Maps Api Key
 
         //Tweeter Api Keys
         buildTypes.each {
-            it.buildConfigField 'String', 'TwitterApiKey', '"PUT_YOUR_API_KEY"'
-            it.buildConfigField 'String', 'TwitterApiSecret', '"PUT_YOUR_API_KEY"'
-            it.buildConfigField 'String', 'TwitterAccessToken ', '"PUT_YOUR_API_KEY"'
-            it.buildConfigField 'String', 'TwitterAccessTokenSecret ', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterApiKey', '"RUkM3QSu5jV3CdyUjnitHVFtT"'
+            it.buildConfigField 'String', 'TwitterApiSecret', '"e3DVxZM8XOqFPWA9mYN7rW0NzuaGQSJCWD6sLYxr6e0WMnOy9h"'
+            it.buildConfigField 'String', 'TwitterAccessToken ', '"1310541059802509313-QtjoCoe5oMXiY3fsiXrvIgw54LVKF8"'
+            it.buildConfigField 'String', 'TwitterAccessTokenSecret ', '"slI2TpqjSgK1wK5ZTYzzjGqJVyVOscXyPb3xfkLY5GY5Q"'
         }
     }
 
@@ -55,9 +55,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.android.material:material:1.2.1'
-    testImplementation 'junit:junit:4.13'
+    testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
@@ -81,7 +81,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     //Circular image
-    implementation 'de.hdodenhof:circleimageview:3.0.0'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
 
     //lifeCycle
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'

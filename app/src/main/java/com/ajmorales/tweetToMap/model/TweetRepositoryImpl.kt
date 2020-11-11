@@ -44,7 +44,6 @@ class TweetRepositoryImpl : TweetRepository {
                 Log.e("Response: ", "successful!!")
                 responseStr = "UPDATE"
 
-
                     try {
                         val reader = JsonReader(InputStreamReader(response.body()!!.byteStream()))
                         val gson = GsonBuilder().create()

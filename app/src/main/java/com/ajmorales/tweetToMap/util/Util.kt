@@ -20,6 +20,7 @@ class Util {
 
         val capabilities =
             connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+
         if (capabilities != null) {
             if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
                 Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
