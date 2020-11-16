@@ -21,10 +21,10 @@ android {
 
         //Tweeter Api Keys
         buildTypes.each {
-            it.buildConfigField 'String', 'TwitterApiKey', '"RUkM3QSu5jV3CdyUjnitHVFtT"'
-            it.buildConfigField 'String', 'TwitterApiSecret', '"e3DVxZM8XOqFPWA9mYN7rW0NzuaGQSJCWD6sLYxr6e0WMnOy9h"'
-            it.buildConfigField 'String', 'TwitterAccessToken ', '"1310541059802509313-QtjoCoe5oMXiY3fsiXrvIgw54LVKF8"'
-            it.buildConfigField 'String', 'TwitterAccessTokenSecret ', '"slI2TpqjSgK1wK5ZTYzzjGqJVyVOscXyPb3xfkLY5GY5Q"'
+            it.buildConfigField 'String', 'TwitterApiKey', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterApiSecret', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterAccessToken ', '"PUT_YOUR_API_KEY"'
+            it.buildConfigField 'String', 'TwitterAccessTokenSecret ', '"PUT_YOUR_API_KEY"'
         }
     }
 
